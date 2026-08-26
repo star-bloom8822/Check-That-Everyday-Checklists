@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross That: Everyday Checklists</title>
+    <style>
+        :root {
+            --primary: #475569;         
+            --primary-hover: #334155;
+            --add-btn-bg: #608048;         
+            --add-btn-hover: #526640;
+            --progress-text-color: #64748b; 
+            --progress-custom: #6d8252;     
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            --card-bg: #ffffff;
+            --text: #1e293b;            
+            --text-light: #64748b;      
+            --border: #cbd5e1;          
+            --success: #475569;         
+            --danger-bg: #ffffff;       
+            --danger-text: #dc2626;     
+            --danger-border: #fecaca;
+            --danger-hover-bg: #fef2f2;
+            --focus-ring: #94a3b8;
+            --input-bg: #f8fafc;
+            --subsection-bg: #f8fafc;    
+        }
+
+        [data-theme="dark"] {
+            --primary: #64748b;         
+            --primary-hover: #475569;
+            --add-btn-bg: #64748b;
+            --add-btn-hover: #475569;
+            --progress-text-color: #cbd5e1; 
+            --progress-custom: #769656;     
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 100%);
+            --card-bg: #1e293b;         
+            --text: #f1f5f9;            
+            --text-light: #cbd5e1;      
+            --border: #475569;          
+            --success: #f1f5f9;
+            --danger-bg: #1e293b;
+            --danger-text: #fca5a5;     
+            --danger-border: #7f1d1d;
+            --danger-hover-bg: #450a0a;
+            --focus-ring: #94a3b8;
+            --input-bg: #0f172a;        
+            --subsection-bg: #0f172a;    
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: background 0.3s ease, color 0.3s ease;
+            font-size: 16px; 
+        }
+
+        .container {
+            width: 100%;
+            max-width: 620px;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--text);
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+
+        .theme-toggle-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--text-light);
+            background-color: var(--subsection-bg);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 22px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input, button {
+            padding: 12px 14px;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s ease;
+            background-color: var(--input-bg);
+            color: var(--text);
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus, button:focus {
+            border-color: var(--focus-ring);
+            box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2);
+        }
+
+        select, input {
+            width: 100%;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-row input {
+            flex: 1;
+            min-width: 130px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .action-row button {
+            background-color: var(--add-btn-bg);
+            color: #ffffff;
+        }
+
+        .action-row button:hover {
+            background-color: var(--add-btn-hover);
+        }
+
+        [data-theme="dark"] button:not(.secondary-btn):not(.delete-list-btn) {
+            color: #f1f5f9 !important; 
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--text);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .secondary-btn {
+            background-color: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 7px 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .secondary-btn:hover {
+            background-color: rgba(148, 163, 184, 0.15);
+            border-color: var(--text-light);
+        }
+
+        .secondary-btn.active {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .delete-list-btn {
+            background-color: var(--danger-bg);
+            color: var(--danger-text);
+            padding: 7px 12px;
+            font-size: 0.9rem;
+            border: 1px solid var(--danger-border);
+        }
+
+        .delete-list-btn:hover {
+            background-color: var(--danger-hover-bg);
+        }
+
+        .undo-banner {
+            display: none;
+            background: var(--subsection-bg);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .inline-confirm-box {
+            display: none;
+            background: var(--subsection-bg);
+            border: 1px dashed var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .inline-confirm-box div {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: var(--progress-text-color); 
+            margin-bottom: 6px;
+            font-weight: 700; 
+        }
+
+        .progress-container {
+            background-color: var(--border);
+            border-radius: 999px;
+            height: 8px;
+            width: 100%;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--progress-custom); 
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .utility-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .utility-bar input {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+        }
+
+        .save-indicator {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        .subsection-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .subsection {
+            background: var(--subsection-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .subsection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .subsection-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .inline-rename-row {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .inline-rename-row input {
+            padding: 6px 10px;
+            font-size: 0.95rem;
+            height: 32px;
+        }
+
+        .inline-rename-row button {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            height: 32px;
+        }
+
+        .edit-sub-btn {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-sub-btn:hover {
+            border-color: var(--text-light);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .item-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .item-text input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        li.completed .item-text span {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+
+        .item-delete-btn {
+            background-color: transparent;
+            color: var(--text-light);
+            border: none;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+        }
+
+        .item-delete-btn:hover {
+            color: var(--danger-text);
+            background-color: rgba(220, 38, 38, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        #newListContainer {
+            display: none;
+            margin-top: 12px;
+            padding: 14px;
+            background: var(--subsection-bg);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="app-header">
+        <h1>Cross That: Everyday Checklists</h1>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+            <span id="themeIcon">🌓</span> <span id="themeBtnText">Theme</span>
+        </button>
+    </div>
+
+    <!-- Dropdown Selector Card -->
+    <div class="card">
+        <div class="selector-group">
+            <label for="listSelector">Select Checklist</label>
+            <select id="listSelector" onchange="handleDropdownChange()"></select>
+        </div>
+
+        <div id="newListContainer">
+            <label for="newListInput" style="margin-bottom: 5px; display: block;">Name your new checklist:</label>
+            <div class="action-row" style="margin-top: 5px;">
+                <input type="text" id="newListInput" placeholder="e.g., Packing, Workout..." onkeypress="handleNewListKeypress(event)">
+                <button onclick="saveNewList()">Create</button>
+                <button class="secondary-btn" onclick="cancelNewList()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Checklist Card -->
+    <div class="card">
+        <div class="undo-banner" id="undoBanner">
+            <span id="undoText">List deleted.</span>
+            <button onclick="undoDeleteList()">Undo</button>
+        </div>
+
+        <div class="header-flex">
+            <h2 id="currentCategoryTitle">Travel Pack</h2>
+            <div class="btn-group">
+                <button class="secondary-btn" id="filterMissingBtn" onclick="toggleMissingFilter()">Missing</button>
+                <button class="secondary-btn" onclick="uncheckAll()">Reset</button>
+                <button class="secondary-btn" onclick="showResetConfirm()">Clear</button>
+                <button class="delete-list-btn" id="deleteListBtn" onclick="deleteCurrentList()">Delete</button>
+            </div>
+        </div>
+
+        <div class="inline-confirm-box" id="resetConfirmBox">
+            <div id="resetConfirmText">Clear all items in this checklist?</div>
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                <button onclick="executeResetAll()">Yes, Clear</button>
+                <button class="secondary-btn" onclick="hideResetConfirm()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="utility-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Search items..." oninput="render()">
+        </div>
+
+        <div class="progress-info">
+            <span id="progressText">0 of 0 completed</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Save Indicator -->
+        <div class="save-indicator" id="saveIndicator">Saved locally just now</div>
+        
+        <div class="action-row">
+            <input type="text" id="itemInput" placeholder="Add new item..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="subInput" placeholder="Subsection (optional)" onkeypress="handleKeyPress(event)">
+            <button onclick="addItem()">Add</button>
+        </div>
+
+        <div class="subsection-container" id="subsectionContainer"></div>
+    </div>
+
+    <!-- Clean Tools Card (Copy List Text & Print) -->
+    <div class="card">
+        <label style="display:block; margin-bottom: 8px;">List Actions & Utilities</label>
+        <div class="tools-grid">
+            <button class="secondary-btn" id="copyBtn" onclick="copyListAsText()">📋 Copy List Text</button>
+            <button class="secondary-btn" onclick="printList()">🖨️ Print Active List</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let appData = JSON.parse(localStorage.getItem('offlineTrackerData')) || {
+        "Travel Pack": [
+            { text: "Passport", completed: true, sub: "Documents" },
+            { text: "Toothbrush", completed: false, sub: "Personal Care" }
+        ]
+    };
+
+    let editingSubsectionName = null;
+    let showOnlyMissing = false;
+    let recentlyDeletedList = null;
+
+    const savedTheme = localStorage.getItem('checklistTheme') || 'light';
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('checklistTheme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('checklistTheme', 'dark');
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('offlineTrackerData', JSON.stringify(appData));
+        updateSaveIndicator();
+        render();
+    }
+
+    function updateSaveIndicator() {
+        const indicator = document.getElementById('saveIndicator');
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        indicator.innerText = `Saved locally at ${timeString}`;
+    }
+
+    function handleDropdownChange() {
+        const selector = document.getElementById('listSelector');
+        const newListContainer = document.getElementById('newListContainer');
+        editingSubsectionName = null;
+        hideResetConfirm();
+
+        if (selector.value === "NEW_LIST_OPTION") {
+            newListContainer.style.display = 'block';
+            document.getElementById('newListInput').focus();
+        } else {
+            newListContainer.style.display = 'none';
+            render();
+        }
+    }
+
+    function saveNewList() {
+        const input = document.getElementById('newListInput');
+        const listName = input.value.trim();
+        if (!listName || appData[listName]) return;
+        appData[listName] = []; 
+        input.value = "";
+        document.getElementById('newListContainer').style.display = 'none';
+        saveData();
+        document.getElementById('listSelector').value = listName;
+        render();
+    }
+
+    function handleNewListKeypress(event) { if (event.key === 'Enter') saveNewList(); }
+    function cancelNewList() { document.getElementById('newListContainer').style.display = 'none'; render(); }
+
+    function deleteCurrentList() {
+        const selector = document.getElementById('listSelector');
+        const currentCategory = selector.value;
+        if (Object.keys(appData).length <= 1) return;
+
+        recentlyDeletedList = { name: currentCategory, items: appData[currentCategory] };
+        delete appData[currentCategory];
+        selector.value = Object.keys(appData)[0];
+        saveData();
+
+        document.getElementById('undoText').innerText = `Deleted "${recentlyDeletedList.name}"`;
+        document.getElementById('undoBanner').style.display = 'flex';
+    }
+
+    function undoDeleteList() {
+        if (!recentlyDeletedList) return;
+        appData[recentlyDeletedList.name] = recentlyDeletedList.items;
+        const restored = recentlyDeletedList.name;
+        recentlyDeletedList = null;
+        document.getElementById('undoBanner').style.display = 'none';
+        saveData();
+        document.getElementById('listSelector').value = restored;
+        render();
+    }
+
+    function uncheckAll() {
+        appData[document.getElementById('listSelector').value].forEach(i => i.completed = false);
+        saveData();
+    }
+
+    function showResetConfirm() { document.getElementById('resetConfirmBox').style.display = 'block'; }
+    function hideResetConfirm() { document.getElementById('resetConfirmBox').style.display = 'none'; }
+    function executeResetAll() {
+        appData[document.getElementById('listSelector').value] = [];
+        hideResetConfirm();
+        saveData();
+    }
+
+    function toggleMissingFilter() {
+        showOnlyMissing = !showOnlyMissing;
+        const btn = document.getElementById('filterMissingBtn');
+        btn.classList.toggle('active', showOnlyMissing);
+        btn.innerText = showOnlyMissing ? "All" : "Missing";
+        render();
+    }
+
+    function printList() { window.print(); }
+
+    function copyListAsText() {
+        const activeCat = document.getElementById('listSelector').value;
+        const items = appData[activeCat];
+        if (!items || items.length === 0) return;
+
+        let textOutput = `Checklist: ${activeCat}\n`;
+        items.forEach(i => {
+            textOutput += `${i.completed ? '[x]' : '[ ]'} ${i.text} (${i.sub || 'General'})\n`;
+        });
+
+        const confirmCopySuccess = () => {
+            const copyBtn = document.getElementById('copyBtn');
+            const originalText = copyBtn.innerText;
+            copyBtn.innerText = "✓ Copied!";
+            setTimeout(() => {
+                copyBtn.innerText = originalText;
+            }, 2000);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textOutput).then(confirmCopySuccess).catch(() => {
+                fallbackCopyText(textOutput, confirmCopySuccess);
+            });
+        } else {
+            fallbackCopyText(textOutput, confirmCopySuccess);
+        }
+    }
+
+    function fallbackCopyText(text, onSuccess) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";  // Avoid scrolling to bottom
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                onSuccess();
+            }
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+        }
+        document.body.removeChild(textarea);
+    }
+
+    function startEditingSubsection(subName) { editingSubsectionName = subName; render(); }
+    function saveSubsectionEdit(oldSub) {
+        const newSub = document.getElementById(`editSubInput_${oldSub.replace(/\s+/g, '_')}`).value.trim();
+        if (!newSub) return;
+        appData[document.getElementById('listSelector').value].forEach(i => { if ((i.sub || "General") === oldSub) i.sub = newSub; });
+        editingSubsectionName = null;
+        saveData();
+    }
+    function cancelSubsectionEdit() { editingSubsectionName = null; render(); }
+
+    function addItem() {
+        const input = document.getElementById('itemInput');
+        const subInput = document.getElementById('subInput');
+        const cat = document.getElementById('listSelector').value;
+        const text = input.value.trim();
+        if (!text) return;
+        appData[cat].push({ text, completed: false, sub: subInput.value.trim() || "General" });
+        input.value = '';
+        subInput.value = '';
+        saveData();
+    }
+
+    function handleKeyPress(event) { if (event.key === 'Enter') addItem(); }
+    function toggleItem(idx) { appData[document.getElementById('listSelector').value][idx].completed = !appData[document.getElementById('listSelector').value][idx].completed; saveData(); }
+    function deleteItem(idx) { appData[document.getElementById('listSelector').value].splice(idx, 1); saveData(); }
+
+    function render() {
+        const selector = document.getElementById('listSelector');
+        const current = selector.value;
+        selector.innerHTML = '';
+        
+        Object.keys(appData).forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat; opt.innerText = cat;
+            selector.appendChild(opt);
+        });
+        
+        const newOpt = document.createElement('option');
+        newOpt.value = "NEW_LIST_OPTION"; newOpt.innerText = "+ Create New Checklist...";
+        selector.appendChild(newOpt);
+
+        if (appData[current]) selector.value = current;
+        else selector.value = Object.keys(appData)[0];
+
+        const activeCat = selector.value;
+        document.getElementById('currentCategoryTitle').innerText = activeCat;
+        document.getElementById('deleteListBtn').style.display = Object.keys(appData).length > 1 ? 'block' : 'none';
+
+        const container = document.getElementById('subsectionContainer');
+        container.innerHTML = '';
+
+        const items = appData[activeCat];
+        const total = items.length;
+        const completed = items.filter(i => i.completed).length;
+        const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+        document.getElementById('progressText').innerText = `${completed} of ${total} completed`;
+        document.getElementById('progressPercent').innerText = `${pct}%`;
+        document.getElementById('progressBar').style.width = `${pct}%`;
+
+        if (total === 0) {
+            container.innerHTML = `<div class="empty-state">No items added yet.</div>`;
+            return;
+        }
+
+        let filtered = items.map((item, originalIndex) => ({ ...item, originalIndex }));
+        
+        if (showOnlyMissing) filtered = filtered.filter(i => !i.completed);
+
+        const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (searchQuery) {
+            filtered = filtered.filter(i => i.text.toLowerCase().includes(searchQuery) || (i.sub && i.sub.toLowerCase().includes(searchQuery)));
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="empty-state">No matching items found.</div>`;
+            return;
+        }
+
+        const grouped = {};
+        filtered.forEach(i => {
+            const sub = i.sub || "General";
+            if (!grouped[sub]) grouped[sub] = [];
+            grouped[sub].push(i);
+        });
+
+        for (const [subName, subItems] of Object.entries(grouped)) {
+            const subDiv = document.createElement('div');
+            subDiv.className = 'subsection';
+            const safeId = subName.replace(/\s+/g, '_');
+            const totalSub = items.filter(i => (i.sub || "General") === subName).length;
+            const compSub = items.filter(i => (i.sub || "General") === subName && i.completed).length;
+
+            if (editingSubsectionName === subName) {
+                subDiv.innerHTML = `
+                    <div class="subsection-header">
+                        <div class="inline-rename-row">
+                            <input type="text" id="editSubInput_${safeId}" value="${subName}" onkeypress="if(event.key==='Enter') saveSubsectionEdit('${subName.replace(/'/g, "\\'")}')">
+                            <button onclick="saveSubsectionEdit('${subName.replace(/'/g, "\\'")}')">Save</button>
+                            <button class="secondary-btn" onclick="cancelSubsectionEdit()">Cancel</button>
+                        </div>
+                    </div>`;
+            } else {
+                subDiv.innerHTML = `
+                    <div class="subsection-header">
+                        <span class="subsection-title">${subName} (${compSub}/${totalSub})</span>
+                        <button class="edit-sub-btn" onclick="startEditingSubsection('${subName.replace(/'/g, "\\'")}')">Rename</button>
+                    </div>`;
+            }
+
+            const ul = document.createElement('ul');
+            subItems.forEach(i => {
+                const li = document.createElement('li');
+                if (i.completed) li.className = 'completed';
+                li.innerHTML = `
+                    <label class="item-text">
+                        <input type="checkbox" ${i.completed ? 'checked' : ''} onchange="toggleItem(${i.originalIndex})">
+                        <span>${i.text}</span>
+                    </label>
+                    <button class="item-delete-btn" onclick="deleteItem(${i.originalIndex})">✕</button>`;
+                ul.appendChild(li);
+            });
+            subDiv.appendChild(ul);
+            container.appendChild(subDiv);
+        }
+    }
+    render();
+</script>
+
+</body>
+</html>
